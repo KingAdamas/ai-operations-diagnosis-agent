@@ -14,13 +14,25 @@ The purpose of this app is to demonstrate how AI can support operations leaders 
 
 The agent helps translate an operational issue into:
 
-- visible symptoms
-- likely root causes
-- structural/system issues
-- recommended fixes
-- a 7-day action plan
+- Visible symptoms
+- Likely root causes
+- Structural or system issues
+- Recommended fixes
+- A 7-day action plan
 - KPIs or signals to monitor
-- an executive summary
+- An executive summary
+
+---
+
+## App Screenshots
+
+### Input Screen
+
+![AI Operations Diagnosis Agent input screen](screenshots/app-input.png)
+
+### Diagnosis Output
+
+![AI Operations Diagnosis Agent diagnosis output](screenshots/app-output.png)
 
 ---
 
@@ -28,40 +40,43 @@ The agent helps translate an operational issue into:
 
 The user enters:
 
-- an operational problem statement
-- industry or business context
-- urgency level
-- team size or volume context
+- An operational problem statement
+- Industry or business context
+- Urgency level
+- Team size or volume context
 
 The app then runs a two-step AI workflow:
 
 1. **Issue Classification Tool**  
-   A function/tool classifies the operational issue before diagnosis.
+	A function/tool classifies the operational issue before diagnosis.
 
 2. **Operations Diagnosis Agent**  
-   An OpenAI Agents SDK workflow generates a structured diagnosis using the Layered Thinking framework.
+	An OpenAI Agents SDK workflow generates a structured diagnosis using the Layered Thinking framework.
 
 ---
 
 ## Diagnosis Framework
 
-The output is organized into:
+The output is organized into the following sections:
 
 ### Layer 1: Visible Symptoms
+
 What is showing up on the surface, such as missed SLAs, delays, complaints, rework, or backlog growth.
 
 ### Layer 2: Likely Root Causes
+
 What may be driving the issue, such as unclear ownership, weak handoffs, poor prioritization, missing feedback loops, or inconsistent processes.
 
 ### Layer 3: Structural/System Issues
+
 What in the operating system allows the issue to continue, such as undocumented workflows, limited reporting, reactive governance, or lack of escalation rules.
 
-The app then provides:
+The app also provides:
 
 - Recommended fixes
-- 7-day action plan
+- A 7-day action plan
 - KPIs or signals to monitor
-- Executive summary
+- An executive summary
 
 ---
 
@@ -95,8 +110,43 @@ This project demonstrates:
 
 ## How to Run Locally
 
-### 1. Clone the repository
+1. Clone the repository
 
 ```bash
 git clone https://github.com/KingAdamas/ai-operations-diagnosis-agent.git
 cd ai-operations-diagnosis-agent
+```
+
+2. Create and activate a Python virtual environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+```
+
+3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Set your OpenAI API key (environment variable)
+
+```bash
+export OPENAI_API_KEY="sk-..."   # macOS/Linux
+setx OPENAI_API_KEY "sk-..."     # Windows (restart shell)
+```
+
+5. Run the Streamlit app
+
+```bash
+streamlit run app.py
+```
+
+6. Open the URL shown by Streamlit (usually http://localhost:8501) and interact with the app.
+
+---
+
+If you need to customize agent behavior or tools, inspect the code in the repository for the Issue Classification tool and the Agents SDK workflow.
+
