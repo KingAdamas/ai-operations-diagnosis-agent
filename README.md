@@ -4,23 +4,21 @@ A browser-based AI agent that helps operations leaders turn messy business probl
 
 This project uses **Python**, **Streamlit**, and the **OpenAI Agents SDK** to analyze operational issues through a layered diagnosis framework focused on visibility, root causes, system design, and action planning.
 
+## Live Demo
+
+[Open the AI Operations Diagnosis Agent](https://ai-operations-diagnosis-agent.streamlit.app/)
+
 ---
 
 ## Project Purpose
 
-Many operational problems show up as missed SLAs, backlog growth, customer escalations, unclear ownership, or repeated handoff failures.
+Many operational problems do not start as people problems.
 
-The purpose of this app is to demonstrate how AI can support operations leaders by creating structure around those problems instead of producing generic advice.
+They show up as missed SLAs, backlog growth, customer escalations, unclear ownership, repeated handoff failures, poor visibility, or reactive leadership updates.
 
-The agent helps translate an operational issue into:
+The purpose of this app is to show how AI can support operations leaders by creating structure around those problems. Instead of giving generic advice, the agent helps translate a messy operational issue into a clear diagnosis that leaders can act on.
 
-- Visible symptoms
-- Likely root causes
-- Structural or system issues
-- Recommended fixes
-- A 7-day action plan
-- KPIs or signals to monitor
-- An executive summary
+This project reflects a practical use of AI in operations, process improvement, project management, and workflow optimization.
 
 ---
 
@@ -47,36 +45,81 @@ The user enters:
 
 The app then runs a two-step AI workflow:
 
-1. **Issue Classification Tool**  
-	A function/tool classifies the operational issue before diagnosis.
+### 1. Issue Classification Tool
 
-2. **Operations Diagnosis Agent**  
-	An OpenAI Agents SDK workflow generates a structured diagnosis using the Layered Thinking framework.
+A tool/function classifies the operational issue before diagnosis. This gives the agent more structure before producing the final response.
+
+### 2. Operations Diagnosis Agent
+
+An OpenAI Agents SDK workflow generates a structured diagnosis using a Layered Thinking framework.
+
+The final output includes:
+
+- Layer 1: Visible symptoms
+- Layer 2: Likely root causes
+- Layer 3: Structural/system issues
+- Recommended fixes
+- 7-day action plan
+- KPIs or signals to monitor
+- Executive summary
 
 ---
 
 ## Diagnosis Framework
 
-The output is organized into the following sections:
+The app uses a Layered Thinking framework to separate surface-level symptoms from deeper system issues.
 
 ### Layer 1: Visible Symptoms
 
-What is showing up on the surface, such as missed SLAs, delays, complaints, rework, or backlog growth.
+What is showing up on the surface?
+
+Examples include:
+
+- Missed SLAs
+- Delayed handoffs
+- Backlog growth
+- Repeat customer contacts
+- Escalations
+- Rework
+- Inconsistent updates
+- Low visibility into work status
 
 ### Layer 2: Likely Root Causes
 
-What may be driving the issue, such as unclear ownership, weak handoffs, poor prioritization, missing feedback loops, or inconsistent processes.
+What may be driving the issue?
+
+Examples include:
+
+- Unclear ownership
+- Weak handoff rules
+- Poor prioritization
+- Missing feedback loops
+- Inconsistent process execution
+- Unclear escalation triggers
+- Limited reporting visibility
 
 ### Layer 3: Structural/System Issues
 
-What in the operating system allows the issue to continue, such as undocumented workflows, limited reporting, reactive governance, or lack of escalation rules.
+What in the operating system allows the issue to continue?
 
-The app also provides:
+Examples include:
 
-- Recommended fixes
-- A 7-day action plan
-- KPIs or signals to monitor
-- An executive summary
+- Undocumented workflows
+- Reactive governance
+- No standardized case movement rules
+- No shared source of truth
+- Reporting that shows outcomes but not process friction
+- Processes built for a smaller or simpler operation
+
+---
+
+## Example Use Case
+
+A user might enter:
+
+> Our team is missing SLA targets because cases are sitting too long between handoffs. Leaders keep asking for more updates, but the process still feels reactive. Nobody is clear on who owns the next step after the first review.
+
+The agent returns a structured diagnosis that helps identify whether the issue is a people problem, a process problem, a visibility problem, or a system design problem.
 
 ---
 
@@ -87,6 +130,8 @@ The app also provides:
 - OpenAI Agents SDK
 - python-dotenv
 - GitHub Codespaces
+- GitHub
+- Streamlit Community Cloud
 - Environment-variable-based secret management
 
 ---
@@ -102,51 +147,95 @@ This project demonstrates:
 - Workflow optimization thinking
 - Root-cause analysis
 - Process improvement
-- Streamlit app development
+- Streamlit web app development
 - Secure API key handling with environment variables
-- Portfolio-ready AI application development
+- GitHub-based portfolio project development
+- Deployment through Streamlit Community Cloud
 
 ---
 
 ## How to Run Locally
 
-1. Clone the repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/KingAdamas/ai-operations-diagnosis-agent.git
 cd ai-operations-diagnosis-agent
 ```
 
-2. Create and activate a Python virtual environment
+### 2. Create and activate a virtual environment
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-.venv\Scripts\activate     # Windows
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-3. Install dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set your OpenAI API key (environment variable)
+### 4. Add your OpenAI API key
+
+Create a `.env` file:
 
 ```bash
-export OPENAI_API_KEY="sk-..."   # macOS/Linux
-setx OPENAI_API_KEY "sk-..."     # Windows (restart shell)
+touch .env
 ```
 
-5. Run the Streamlit app
+Add your key:
+
+```env
+OPENAI_API_KEY=your_api_key_here
+```
+
+Do not commit your `.env` file.
+
+### 5. Run the app
 
 ```bash
 streamlit run app.py
 ```
 
-6. Open the URL shown by Streamlit (usually http://localhost:8501) and interact with the app.
+---
+
+## Deployment
+
+This app is deployed with Streamlit Community Cloud.
+
+The OpenAI API key is stored as a Streamlit secret and is not committed to GitHub.
 
 ---
 
-If you need to customize agent behavior or tools, inspect the code in the repository for the Issue Classification tool and the Agents SDK workflow.
+## Security Notes
 
+This project uses environment variables for API key management.
+
+API keys should never be:
+
+- Hard-coded in the app
+- Printed in logs
+- Exposed in screenshots
+- Committed to GitHub
+- Shared publicly
+
+Users should also avoid entering confidential, private, or sensitive business information into public demo apps.
+
+---
+
+## Portfolio Positioning
+
+This project was built to demonstrate practical AI application in operations leadership.
+
+Rather than using AI as a generic chatbot, this app shows how an AI agent can support better decision-making by creating structure, visibility, and action steps around real operational problems.
+
+It reflects my broader professional focus:
+
+> Helping organizations fix what slows them down by improving workflows, clarifying ownership, and building better operating systems.
+
+---
+
+## Author
+
+Built by **Derek Blissett** as a portfolio project demonstrating AI, operations strategy, workflow optimization, and practical app development.
