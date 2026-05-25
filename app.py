@@ -54,9 +54,9 @@ def run_diagnosis(problem: str, industry: str, urgency: str, team_context: str) 
     client = OpenAI(api_key=api_key)
     prompt = build_prompt(problem, industry, urgency, team_context)
 
-    response = client.responses.create(
+    response = client.chat.completions.create(
         model="gpt-4.1-mini",
-        input=[
+        messages=[
             {
                 "role": "system",
                 "content": "You are a clear, practical operations diagnosis assistant.",
@@ -69,7 +69,8 @@ def run_diagnosis(problem: str, industry: str, urgency: str, team_context: str) 
         temperature=0.3,
     )
 
-    return response.output_text.strip()
+    content = response.choices[0].message.content or ""
+    return content.strip()
 
 
 def main() -> None:
