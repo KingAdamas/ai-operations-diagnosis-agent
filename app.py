@@ -2,7 +2,8 @@ import os
 from textwrap import dedent
 
 import streamlit as st
-from openai import OpenAI
+from agents import Agent, Runner, function_tool
+from dotenv import load_dotenv
 
 
 INDUSTRY_OPTIONS = [
@@ -17,6 +18,26 @@ INDUSTRY_OPTIONS = [
 ]
 
 URGENCY_OPTIONS = ["Low", "Medium", "High"]
+
+
+load_dotenv()
+
+
+@function_tool
+def classify_operational_issue(problem_statement: str) -> str:
+    """Classify an operations issue into a simple category for diagnosis context."""
+    text = problem_statement.lower()
+
+    if any(word in text for word in ["delay", "backlog", "sla", "queue", "throughput"]):
+        return "Classification: Capacity and process flow issue"
+    if any(word in text for word in ["error", "rework", "defect", "quality", "accuracy"]):
+        return "Classification: Quality control issue"
+    if any(word in text for word in ["churn", "escalation", "complaint", "csat", "nps"]):
+        return "Classification: Customer experience issue"
+    if any(word in text for word in ["fraud", "compliance", "risk", "audit", "regulatory"]):
+        return "Classification: Risk and compliance issue"
+
+    return "Classification: General operations issue"
 
 
 def build_prompt(problem: str, industry: str, urgency: str, team_context: str) -> str:
@@ -46,31 +67,41 @@ def build_prompt(problem: str, industry: str, urgency: str, team_context: str) -
     ).strip()
 
 
-def run_diagnosis(problem: str, industry: str, urgency: str, team_context: str) -> str:
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+def run_diagnosis(
+    problem: str, industry: str, urgency: str, team_context: str
+) -> tuple[str, str]:
+    if not os.getenv("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY is not set.")
 
-    client = OpenAI(api_key=api_key)
-    prompt = build_prompt(problem, industry, urgency, team_context)
-
-    response = client.chat.completions.create(
+    classifier_agent = Agent(
+        name="Operations Issue Classifier",
+        instructions=(
+            "Use the classify_operational_issue tool to classify the problem statement. "
+            "Return only the classification result from the tool."
+        ),
         model="gpt-4.1-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a clear, practical operations diagnosis assistant.",
-            },
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        ],
-        temperature=0.3,
+        tools=[classify_operational_issue],
     )
+    classification_result = Runner.run_sync(classifier_agent, problem)
 
-    content = response.choices[0].message.content or ""
-    return content.strip()
+    diagnosis_agent = Agent(
+        name="AI Operations Diagnosis Agent",
+        instructions=(
+            "You are a clear, practical operations diagnosis assistant. "
+            "Use the provided issue classification and context to produce an actionable diagnosis."
+        ),
+        model="gpt-4.1-mini",
+    )
+    diagnosis_prompt = build_prompt(problem, industry, urgency, team_context)
+    diagnosis_input = (
+        f"Issue pre-classification:\n{classification_result.final_output}\n\n"
+        f"{diagnosis_prompt}"
+    )
+    diagnosis_result = Runner.run_sync(diagnosis_agent, diagnosis_input)
+
+    classification_text = str(classification_result.final_output or "").strip()
+    diagnosis_text = str(diagnosis_result.final_output or "").strip()
+    return classification_text, diagnosis_text
 
 
 def main() -> None:
@@ -101,12 +132,17 @@ def main() -> None:
 
         with st.spinner("Running diagnosis..."):
             try:
-                diagnosis = run_diagnosis(problem, industry, urgency, team_context)
+                classification, diagnosis = run_diagnosis(
+                    problem, industry, urgency, team_context
+                )
             except Exception as error:  # noqa: BLE001
                 st.error(f"Unable to run diagnosis: {error}")
                 return
 
         st.success("Diagnosis complete")
+        st.subheader("Issue classification")
+        st.write(classification)
+        st.subheader("Layered diagnosis")
         st.markdown(diagnosis)
 
 

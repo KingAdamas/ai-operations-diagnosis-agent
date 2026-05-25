@@ -1,6 +1,6 @@
 # AI Operations Diagnosis Agent
 
-AI Operations Diagnosis Agent is a beginner-friendly Streamlit web app that helps an operations leader diagnose business/operational problems using a layered thinking framework.
+AI Operations Diagnosis Agent is a beginner-friendly Streamlit web app that helps an operations leader diagnose business/operational problems using an AI agent workflow and layered thinking framework.
 
 ## What this app does
 
@@ -10,7 +10,11 @@ A user enters:
 - urgency level,
 - team size or volume context.
 
-The app then generates a structured diagnosis with:
+The app runs a two-step workflow:
+1. A simple classification tool categorizes the issue.
+2. An OpenAI Agents SDK diagnosis agent generates a structured response.
+
+The diagnosis includes:
 - Layer 1: Visible symptoms
 - Layer 2: Likely root causes
 - Layer 3: Structural/system issues
@@ -35,6 +39,14 @@ pip install -r requirements.txt
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
+Optional for local/Codespaces testing:
+
+```bash
+echo 'OPENAI_API_KEY=your_api_key_here' > .env
+```
+
+The app loads `.env` with `python-dotenv`, while still reading the key from the `OPENAI_API_KEY` environment variable.
+
 5. **Run the Streamlit app**
 
 ```bash
@@ -44,9 +56,11 @@ streamlit run app.py
 ## Skills this portfolio project demonstrates
 
 - AI-assisted operations diagnosis
+- OpenAI Agents SDK workflow design
 - Prompt design for structured business outputs
 - Workflow optimization and root-cause analysis mindset
 - Practical Python app development with Streamlit
+- Tool/function design for issue classification
 - Secure handling of API credentials via environment variables
 
 ## Portfolio positioning
