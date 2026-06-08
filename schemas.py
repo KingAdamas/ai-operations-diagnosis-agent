@@ -203,7 +203,9 @@ PROJECT_DIAGNOSIS_SCHEMA = {
             "type": "array",
             "description": (
                 "3 to 5 observable signs the project is off track. Slipped "
-                "milestones, scope drift, stakeholder concerns, confidence drops."
+                "milestones, scope drift, stakeholder concerns, confidence "
+                "drops, sprint commitments missed, velocity declining, "
+                "backlog growing faster than it clears."
             ),
             "items": {"type": "string"},
         },
@@ -212,7 +214,9 @@ PROJECT_DIAGNOSIS_SCHEMA = {
             "description": (
                 "3 to 5 proximate drivers. Each names which Layer 1 risks it "
                 "explains. Look at dependencies, decision cadence, ownership, "
-                "handoffs, and requirements churn."
+                "handoffs, requirements churn, sprint planning quality, "
+                "standup effectiveness, definition of done gaps, and product "
+                "owner availability."
             ),
             "items": {
                 "type": "object",
@@ -233,7 +237,8 @@ PROJECT_DIAGNOSIS_SCHEMA = {
                 "3 to 5 structural conditions enabling risk to persist on this "
                 "project. Charter ambiguity, sponsor disengagement, governance "
                 "cadence mismatch, escalation paths that do not work, missing "
-                "decision authority."
+                "decision authority, Agile maturity gaps, missing or unclear "
+                "Scrum roles, ineffective ceremonies, poor estimation culture."
             ),
             "items": {"type": "string"},
         },
@@ -241,8 +246,9 @@ PROJECT_DIAGNOSIS_SCHEMA = {
             "type": "array",
             "description": (
                 "5 to 6 specific recovery actions. Each names a project rhythm or "
-                "artifact: standup, status report, steering committee, RAID log, "
-                "milestone gate, decision authority. Each names which driver or "
+                "artifact: standup, sprint review, retrospective, backlog grooming, "
+                "status report, steering committee, RAID log, milestone gate, "
+                "definition of done, decision authority. Each names which driver or "
                 "structural condition it addresses."
             ),
             "items": {
