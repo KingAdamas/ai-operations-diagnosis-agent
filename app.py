@@ -109,33 +109,29 @@ html, body, [class*="css"], * {
 }
 [data-testid="stSelectbox"] svg { color: #64748B !important; }
 
-/* ── Radio ── */
-[data-testid="stRadio"] > div {
-    flex-direction: column !important;
-    gap: 8px !important;
-}
-[data-testid="stRadio"] label {
+/* ── Mode picker cards (secondary buttons) ── */
+[data-testid="stBaseButton-secondary"] button {
+    height: 80px !important;
     background: #FFFFFF !important;
     border: 1.5px solid #E2E8F0 !important;
-    border-radius: 9px !important;
-    padding: 14px 18px !important;
-    cursor: pointer !important;
-    transition: border-color 0.15s, background 0.15s !important;
-    align-items: center !important;
-}
-[data-testid="stRadio"] label:hover {
-    border-color: #94A3B8 !important;
-    background: #F8FAFC !important;
-}
-[data-testid="stRadio"] label span {
+    border-radius: 10px !important;
+    color: #334155 !important;
     font-size: 13.5px !important;
     font-weight: 500 !important;
-    color: #334155 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    line-height: 1.55 !important;
+    padding: 14px 18px !important;
+    width: 100% !important;
+    transition: border-color 0.15s, background 0.15s !important;
+}
+[data-testid="stBaseButton-secondary"] button:hover {
+    background: #F8FAFC !important;
+    border-color: #94A3B8 !important;
 }
 
-/* ── Primary button ── */
-[data-testid="stBaseButton-primary"] button,
-.stButton > button {
+/* ── Run Diagnosis button (primary) ── */
+[data-testid="stBaseButton-primary"] button {
     background-color: #E63000 !important;
     color: #FFFFFF !important;
     font-weight: 700 !important;
@@ -147,10 +143,10 @@ html, body, [class*="css"], * {
     width: 100% !important;
     height: 48px !important;
 }
-.stButton > button:hover {
+[data-testid="stBaseButton-primary"] button:hover {
     background-color: #C42800 !important;
 }
-.stButton > button:active {
+[data-testid="stBaseButton-primary"] button:active {
     background-color: #A82200 !important;
     transform: scale(0.99) !important;
 }
@@ -640,20 +636,65 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="form-section-label">What are you diagnosing?</div>', unsafe_allow_html=True)
+# ── Mode picker state ──
+if "mode" not in st.session_state:
+    st.session_state.mode = "operations"
 
-mode_choice = st.radio(
-    label="mode",
-    options=[
-        "Operating System — ongoing performance, team, queue, workflow",
-        "Project Recovery — delivery, sprints, milestones, scope, stakeholder alignment",
-        "Not sure, let the tool decide",
-    ],
-    index=0,
-    label_visibility="collapsed",
+_active_col = {"operations": 1, "project": 2, "infer": 3}.get(
+    st.session_state.mode, 1
 )
 
-st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
+# Inject dynamic CSS for the active card using :has() to scope to this block
+st.markdown(f"""
+<style>
+[data-testid="stMarkdownContainer"]:has(#mode-anchor)
++ [data-testid="stHorizontalBlock"]
+[data-testid="stColumn"]:nth-child({_active_col})
+[data-testid="stBaseButton-secondary"] button {{
+    background: #EFF6FF !important;
+    border: 2px solid #0F2044 !important;
+    color: #0F2044 !important;
+    font-weight: 700 !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="form-section-label">What are you diagnosing?'
+    '<span id="mode-anchor"></span></div>',
+    unsafe_allow_html=True,
+)
+
+mc1, mc2, mc3 = st.columns(3, gap="small")
+with mc1:
+    if st.button(
+        "Operating System\n\nOngoing performance, team, queue, workflow",
+        key="btn_ops",
+        type="secondary",
+        use_container_width=True,
+    ):
+        st.session_state.mode = "operations"
+        st.rerun()
+with mc2:
+    if st.button(
+        "Project Recovery\n\nDelivery, sprints, milestones, scope, stakeholder alignment",
+        key="btn_proj",
+        type="secondary",
+        use_container_width=True,
+    ):
+        st.session_state.mode = "project"
+        st.rerun()
+with mc3:
+    if st.button(
+        "Let the tool decide\n\nInfer mode from your description",
+        key="btn_infer",
+        type="secondary",
+        use_container_width=True,
+    ):
+        st.session_state.mode = "infer"
+        st.rerun()
+
+st.markdown('<div style="height: 4px;"></div>', unsafe_allow_html=True)
 
 issue = st.text_area(
     "Describe the issue",
@@ -698,7 +739,7 @@ with col5:
     )
 
 st.markdown('<div style="height: 4px;"></div>', unsafe_allow_html=True)
-run = st.button("Run Diagnosis")
+run = st.button("Run Diagnosis", key="run_btn", type="primary", use_container_width=True)
 
 
 # ----------------------------------------------------------------------------
@@ -718,10 +759,11 @@ if run:
             "relationship": relationship,
         }
 
-        if mode_choice.startswith("Operating System"):
+        _selected = st.session_state.get("mode", "operations")
+        if _selected == "operations":
             mode = "operations"
             inferred_note = None
-        elif mode_choice.startswith("Project Recovery"):
+        elif _selected == "project":
             mode = "project"
             inferred_note = None
         else:
