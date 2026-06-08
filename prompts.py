@@ -33,19 +33,25 @@ breakdown likely to recur even if today's instance gets fixed.
 LAYERED_THINKING_PROJECT = """
 The Layered Thinking Framework for project recovery:
 
-Layer 1, visible delivery risks. What is showing up as off-track in the project
+Layer 1, visible delivery risks. What is showing up as off track in the project
 today. Slipped milestones, scope creep, stakeholder concerns, team confidence
-drops, delivery confidence falling. Risks are what the team is reacting to.
-They are not the underlying exposure.
+drops, delivery confidence falling, sprint commitments missed, velocity
+declining, backlog growing faster than it clears. Risks are what the team is
+reacting to. They are not the underlying exposure.
 
 Layer 2, proximate risk drivers. The specific reasons the risks are emerging in
-this project, at this phase, with this team and these dependencies. Drivers
-explain why the project is in this position now.
+this project, at this phase, with this team and these dependencies. Look at
+sprint planning quality, backlog health, standup effectiveness, definition of
+done clarity, dependency handoffs, decision cadence, requirements churn, and
+product owner availability. Drivers explain why the project is in this position
+now.
 
 Layer 3, structural conditions enabling risk. The governance, charter,
 sponsorship, decision cadence, or operating conditions that make this kind of
-risk likely on any project under similar setup. Structural conditions are what
-would have to change to keep the next project from arriving in the same place.
+risk likely on any project under similar setup. Include Agile maturity gaps,
+missing or unclear Scrum roles, ceremony effectiveness, estimation culture,
+and stakeholder engagement model. Structural conditions are what would have to
+change to keep the next project from arriving in the same place.
 """.strip()
 
 
@@ -777,8 +783,11 @@ a decision they will make. You diagnose. They decide.
 Project context note: orient the diagnosis around risk. Layer 1 is visible
 delivery risks. Layer 2 is risk drivers. Layer 3 is structural conditions that
 enable risk to persist on this project and projects like it. Recommendations
-live in real project rhythms: standups, status reports, steering committees,
-RAID logs, milestone gates, charter changes, decision authority.
+live in real project rhythms: standups, sprint reviews, retrospectives, backlog
+grooming, status reports, steering committees, RAID logs, milestone gates,
+charter changes, decision authority. Use Agile and Scrum terminology where the
+project context warrants it: sprint commitments, velocity, burndown, definition
+of done, product owner, Scrum master, acceptance criteria.
 
 {_format_few_shot(PROJECT_FEW_SHOT_INPUT, PROJECT_FEW_SHOT_OUTPUT)}
 
@@ -801,7 +810,8 @@ workforce, scorecard, KPI, productivity.
 Choose "project" if the issue describes a bounded delivery effort with a
 timeline, milestones, a scope, stakeholders, and something off track. Signals:
 launch, go-live, milestone, sprint, scope, charter, vendor, stakeholder,
-steering, RAID, dependency, deliverable, project manager, program.
+steering, RAID, dependency, deliverable, project manager, program, backlog,
+velocity, retrospective, standup, Scrum, Agile, product owner, burndown.
 
 If both apply, choose the one where the user's primary decision sits. If the
 project is inside an operations function and the user is asking about ongoing
