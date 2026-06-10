@@ -7,6 +7,7 @@ Single Streamlit app, two diagnostic modes, one Layered Thinking framework.
 import json
 import streamlit as st
 from agents import classify_issue, run_ops_diagnosis, run_project_diagnosis
+from playback import render_playback, reset_playback
 
 st.set_page_config(
     page_title="The Diagnosis Engine",
@@ -109,8 +110,31 @@ html, body, [class*="css"], * {
 }
 [data-testid="stSelectbox"] svg { color: #64748B !important; }
 
-/* ── Mode picker cards (secondary buttons) ── */
+/* ── Secondary buttons (compact default: view toggle, playback nav) ── */
 [data-testid="stBaseButton-secondary"] button {
+    background: #FFFFFF !important;
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    color: #0F2044 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    height: 40px !important;
+    width: 100% !important;
+    transition: border-color 0.15s, background 0.15s !important;
+}
+[data-testid="stBaseButton-secondary"] button:hover {
+    background: #F8FAFC !important;
+    border-color: #0F2044 !important;
+}
+[data-testid="stBaseButton-secondary"] button:focus:not(:active) {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* ── Mode picker cards (scoped to the three mode buttons by key) ── */
+.st-key-btn_ops button,
+.st-key-btn_proj button,
+.st-key-btn_infer button {
     height: 80px !important;
     background: #FFFFFF !important;
     border: 1.5px solid #E2E8F0 !important;
@@ -122,10 +146,10 @@ html, body, [class*="css"], * {
     white-space: normal !important;
     line-height: 1.55 !important;
     padding: 14px 18px !important;
-    width: 100% !important;
-    transition: border-color 0.15s, background 0.15s !important;
 }
-[data-testid="stBaseButton-secondary"] button:hover {
+.st-key-btn_ops button:hover,
+.st-key-btn_proj button:hover,
+.st-key-btn_infer button:hover {
     background: #F8FAFC !important;
     border-color: #94A3B8 !important;
 }
@@ -640,17 +664,43 @@ st.markdown("""
 if "mode" not in st.session_state:
     st.session_state.mode = "operations"
 
-_active_col = {"operations": 1, "project": 2, "infer": 3}.get(
-    st.session_state.mode, 1
-)
 
-# Inject dynamic CSS for the active card using :has() to scope to this block
+def _set_mode(value):
+    st.session_state.mode = value
+
+
+MODE_CARDS = [
+    (
+        "operations",
+        "btn_ops",
+        "Operating System",
+        "Ongoing performance, team, queue, workflow",
+    ),
+    (
+        "project",
+        "btn_proj",
+        "Project Recovery",
+        "Delivery, sprints, milestones, scope, stakeholder alignment",
+    ),
+    (
+        "infer",
+        "btn_infer",
+        "Let the tool decide",
+        "Infer mode from your description",
+    ),
+]
+
+# Persistent highlight for the selected card. Keyed elements carry a stable
+# .st-key-{key} class, so we target the selected button directly instead of
+# walking the DOM. The focus variants are included so the highlight holds
+# through Streamlit's focus styling, and this rule is injected after the
+# global CSS block so it wins on source order.
+_selected_key = {m: k for m, k, _, _ in MODE_CARDS}[st.session_state.mode]
 st.markdown(f"""
 <style>
-[data-testid="stMarkdownContainer"]:has(#mode-anchor)
-+ [data-testid="stHorizontalBlock"]
-[data-testid="stColumn"]:nth-child({_active_col})
-[data-testid="stBaseButton-secondary"] button {{
+.st-key-{_selected_key} button,
+.st-key-{_selected_key} button:focus,
+.st-key-{_selected_key} button:focus:not(:active) {{
     background: #EFF6FF !important;
     border: 2px solid #0F2044 !important;
     color: #0F2044 !important;
@@ -660,39 +710,21 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 st.markdown(
-    '<div class="form-section-label">What are you diagnosing?'
-    '<span id="mode-anchor"></span></div>',
+    '<div class="form-section-label">What are you diagnosing?</div>',
     unsafe_allow_html=True,
 )
 
-mc1, mc2, mc3 = st.columns(3, gap="small")
-with mc1:
-    if st.button(
-        "Operating System\n\nOngoing performance, team, queue, workflow",
-        key="btn_ops",
-        type="secondary",
-        use_container_width=True,
-    ):
-        st.session_state.mode = "operations"
-        st.rerun()
-with mc2:
-    if st.button(
-        "Project Recovery\n\nDelivery, sprints, milestones, scope, stakeholder alignment",
-        key="btn_proj",
-        type="secondary",
-        use_container_width=True,
-    ):
-        st.session_state.mode = "project"
-        st.rerun()
-with mc3:
-    if st.button(
-        "Let the tool decide\n\nInfer mode from your description",
-        key="btn_infer",
-        type="secondary",
-        use_container_width=True,
-    ):
-        st.session_state.mode = "infer"
-        st.rerun()
+mc_cols = st.columns(3, gap="small")
+for _col, (_value, _key, _title, _subtitle) in zip(mc_cols, MODE_CARDS):
+    with _col:
+        st.button(
+            f"{_title}\n\n{_subtitle}",
+            key=_key,
+            type="secondary",
+            use_container_width=True,
+            on_click=_set_mode,
+            args=(_value,),
+        )
 
 st.markdown('<div style="height: 4px;"></div>', unsafe_allow_html=True)
 
@@ -743,7 +775,8 @@ run = st.button("Run Diagnosis", key="run_btn", type="primary", use_container_wi
 
 
 # ----------------------------------------------------------------------------
-# Execution
+# Execution — the result is stored in session state so it survives the
+# reruns triggered by playback navigation, the view toggle, and downloads.
 # ----------------------------------------------------------------------------
 if run:
     if not issue.strip():
@@ -781,9 +814,6 @@ if run:
                     st.error(f"Routing failed: {str(e)}")
                     st.stop()
 
-        if inferred_note:
-            st.info(inferred_note)
-
         with st.spinner("Running diagnosis..."):
             try:
                 if mode == "operations":
@@ -795,8 +825,12 @@ if run:
                     st.error("The model declined to diagnose this input.")
                     st.info(refusal)
                 else:
-                    st.divider()
-                    render_diagnosis(data, mode)
+                    st.session_state.diagnosis = {
+                        "data": data,
+                        "mode": mode,
+                        "note": inferred_note,
+                    }
+                    reset_playback()
 
             except Exception as e:
                 st.error(f"Something went wrong: {str(e)}")
@@ -805,3 +839,66 @@ if run:
                     "or environment variables. If you see a model-not-found error, "
                     "change MODEL in agents.py to gpt-4o as a fallback."
                 )
+
+
+# ----------------------------------------------------------------------------
+# Results — rendered from session state on every run so the diagnosis
+# persists across interactions. Two views: guided playback and full report.
+# ----------------------------------------------------------------------------
+if "diagnosis" in st.session_state:
+    saved = st.session_state.diagnosis
+
+    st.divider()
+
+    if saved.get("note"):
+        st.info(saved["note"])
+
+    # ── View toggle ──
+    if "view" not in st.session_state:
+        st.session_state.view = "playback"
+
+    def _set_view(value):
+        st.session_state.view = value
+
+    VIEW_TABS = [
+        ("playback", "view_playback", "Guided playback"),
+        ("report", "view_report", "Full report"),
+    ]
+
+    _view_key = {v: k for v, k, _ in VIEW_TABS}[st.session_state.view]
+    st.markdown(f"""
+<style>
+.st-key-{_view_key} button,
+.st-key-{_view_key} button:focus,
+.st-key-{_view_key} button:focus:not(:active) {{
+    background: #0F2044 !important;
+    border: 1.5px solid #0F2044 !important;
+    color: #FFFFFF !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
+    vc1, vc2, _spacer = st.columns([1, 1, 3], gap="small")
+    with vc1:
+        st.button(
+            "Guided playback",
+            key="view_playback",
+            type="secondary",
+            use_container_width=True,
+            on_click=_set_view,
+            args=("playback",),
+        )
+    with vc2:
+        st.button(
+            "Full report",
+            key="view_report",
+            type="secondary",
+            use_container_width=True,
+            on_click=_set_view,
+            args=("report",),
+        )
+
+    if st.session_state.view == "playback":
+        render_playback(saved["data"], saved["mode"])
+    else:
+        render_diagnosis(saved["data"], saved["mode"])
