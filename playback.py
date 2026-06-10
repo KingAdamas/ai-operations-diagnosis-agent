@@ -372,13 +372,14 @@ def _step_summary(result, fmap):
     )
     scratchpad = result.get("scratchpad_reasoning", "")
     if scratchpad:
+        st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
         with st.expander("Show the agent's working notes"):
             st.caption(
                 "The private reasoning the agent worked through before "
                 "committing to the structured diagnosis."
             )
             st.markdown(scratchpad)
-    st.button("Restart playback", key="pb_restart", on_click=reset_playback)
+    st.markdown('<div style="height: 16px;"></div>', unsafe_allow_html=True)
 
 
 _STEP_RENDERERS = [
@@ -414,8 +415,9 @@ def render_playback(result, mode="operations"):
 
     _STEP_RENDERERS[step](result, fmap)
 
+    st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
     st.divider()
-    col_back, col_skip, col_next = st.columns([1, 2, 1])
+    col_back, col_mid, col_next = st.columns([1, 2, 1])
     with col_back:
         st.button(
             "Back",
@@ -425,12 +427,19 @@ def render_playback(result, mode="operations"):
             disabled=(step == 0),
             use_container_width=True,
         )
-    with col_skip:
+    with col_mid:
         if step < total - 1:
             st.button(
                 "Skip to summary",
                 key="pb_skip",
                 on_click=_jump_to_end,
+                use_container_width=True,
+            )
+        else:
+            st.button(
+                "Restart playback",
+                key="pb_restart",
+                on_click=reset_playback,
                 use_container_width=True,
             )
     with col_next:
