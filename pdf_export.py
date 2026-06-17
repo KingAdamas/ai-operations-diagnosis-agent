@@ -299,6 +299,7 @@ def generate_pdf(data: dict, mode: str) -> bytes:
     # ── Cover block ──────────────────────────────────────────────────────────
     cover_data = [[
         Paragraph("Business Diagnosis Report", styles["report_title"]),
+    ], [
         Paragraph(
             f"{mode_label}&nbsp;&nbsp;|&nbsp;&nbsp;{datetime.today().strftime('%B %d, %Y')}",
             styles["report_sub"],
@@ -309,10 +310,10 @@ def generate_pdf(data: dict, mode: str) -> bytes:
         ("BACKGROUND", (0, 0), (-1, -1), NAVY),
         ("LEFTPADDING", (0, 0), (-1, -1), 18),
         ("RIGHTPADDING", (0, 0), (-1, -1), 18),
-        ("TOPPADDING", (0, 0), (0, 0), 18),
+        ("TOPPADDING", (0, 0), (0, 0), 20),
         ("BOTTOMPADDING", (0, 0), (0, 0), 4),
-        ("TOPPADDING", (0, 1), (0, 1), 4),
-        ("BOTTOMPADDING", (0, 1), (0, 1), 18),
+        ("TOPPADDING", (0, 1), (0, 1), 2),
+        ("BOTTOMPADDING", (0, 1), (0, 1), 20),
         ("ROUNDEDCORNERS", [6]),
     ]))
     story.append(cover)
@@ -636,7 +637,6 @@ def generate_pdf(data: dict, mode: str) -> bytes:
         story.append(Spacer(1, 6))
 
     # ── Executive summary ─────────────────────────────────────────────────────
-    _section(story, "The Short Version", styles)
     exec_data = [[Paragraph(data["executive_summary"], styles["exec_summary"])]]
     exec_table = Table(exec_data, colWidths=[6.8 * inch])
     exec_table.setStyle(TableStyle([
@@ -648,7 +648,12 @@ def generate_pdf(data: dict, mode: str) -> bytes:
         ("LINEBEFORE", (0, 0), (0, -1), 4, BLUE),
         ("ROUNDEDCORNERS", [4]),
     ]))
-    story.append(exec_table)
+    story.append(KeepTogether([
+        Paragraph("The Short Version", styles["section_heading"]),
+        HRFlowable(width="100%", thickness=0.5, color=BORDER, spaceAfter=4),
+        Spacer(1, 4),
+        exec_table,
+    ]))
     story.append(Spacer(1, 20))
 
     # ── Build ─────────────────────────────────────────────────────────────────
