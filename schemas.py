@@ -8,7 +8,52 @@ Linkage fields are deliberate: every Layer 2 root cause names which Layer 1
 symptoms it explains, every recommendation names which cause or structural
 issue it addresses, and every KPI carries a direction and a leading/lagging
 designation. This is what turns parallel lists into a connected diagnosis.
+
+Updated to reflect the improved Layered Thinking Framework:
+- layer_1_threshold_gate: the question that must be answered before descending to Layer 2
+- layer_2_threshold_gate: the question that must be answered before descending to Layer 3
+- layer_3_bias_check: the structural condition the analyst least wants to find, tested first
+- verification: defines what Layer 1 would show if Layer 3 changed, set before intervening
 """
+
+
+# ----------------------------------------------------------------------------
+# Shared verification schema (used in both ops and project)
+# ----------------------------------------------------------------------------
+VERIFICATION_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["metric", "direction", "threshold", "counter_signal"],
+    "properties": {
+        "metric": {
+            "type": "string",
+            "description": (
+                "The single Layer 1 metric that should move if the Layer 3 "
+                "structural condition actually changes. Name it specifically."
+            ),
+        },
+        "direction": {
+            "type": "string",
+            "enum": ["increase", "decrease", "hold"],
+            "description": "The direction the metric should move.",
+        },
+        "threshold": {
+            "type": "string",
+            "description": (
+                "By how much, over what window. Specific enough that a flat "
+                "result cannot be rationalized as success."
+            ),
+        },
+        "counter_signal": {
+            "type": "string",
+            "description": (
+                "What Layer 1 would show if the structural diagnosis was wrong "
+                "and a different structural condition is the real cause. "
+                "This is the signal that tells you to re-diagnose."
+            ),
+        },
+    },
+}
 
 
 # ----------------------------------------------------------------------------
@@ -21,12 +66,16 @@ OPS_DIAGNOSIS_SCHEMA = {
         "scratchpad_reasoning",
         "classification",
         "layer_1_symptoms",
+        "layer_1_threshold_gate",
         "layer_2_root_causes",
+        "layer_2_threshold_gate",
         "layer_3_structural",
+        "layer_3_bias_check",
         "recommended_actions",
         "action_plan",
         "kpis",
         "assumptions_to_test",
+        "verification",
         "executive_summary",
     ],
     "properties": {
@@ -51,6 +100,15 @@ OPS_DIAGNOSIS_SCHEMA = {
             "description": "3 to 5 observable surface-level symptoms.",
             "items": {"type": "string"},
         },
+        "layer_1_threshold_gate": {
+            "type": "string",
+            "description": (
+                "The gate question answered before descending to Layer 2. "
+                "Confirm: are there multiple instances of this symptom, and "
+                "do they share a common characteristic? State what that "
+                "characteristic is. If the answer is no, the descent stops here."
+            ),
+        },
         "layer_2_root_causes": {
             "type": "array",
             "description": (
@@ -70,6 +128,15 @@ OPS_DIAGNOSIS_SCHEMA = {
                 },
             },
         },
+        "layer_2_threshold_gate": {
+            "type": "string",
+            "description": (
+                "The gate question answered before descending to Layer 3. "
+                "Confirm: does the identified cause explain the full pattern "
+                "or only part of it? If only part, name what is still unexplained "
+                "and what additional structural condition might account for it."
+            ),
+        },
         "layer_3_structural": {
             "type": "array",
             "description": (
@@ -78,6 +145,16 @@ OPS_DIAGNOSIS_SCHEMA = {
                 "absence of measurement, or absence of function where relevant."
             ),
             "items": {"type": "string"},
+        },
+        "layer_3_bias_check": {
+            "type": "string",
+            "description": (
+                "The structural condition the analyst would least want to find. "
+                "State it explicitly and describe what evidence was checked for "
+                "or against it before committing to the Layer 3 findings above. "
+                "This is the bias check. It must be answered before the structural "
+                "conditions are finalized."
+            ),
         },
         "recommended_actions": {
             "type": "array",
@@ -148,10 +225,11 @@ OPS_DIAGNOSIS_SCHEMA = {
             "type": "array",
             "description": (
                 "3 to 5 assumptions the diagnosis is taking for granted. The "
-                "user should verify these before acting. This is the bias check."
+                "user should verify these before acting."
             ),
             "items": {"type": "string"},
         },
+        "verification": VERIFICATION_SCHEMA,
         "executive_summary": {
             "type": "string",
             "description": (
@@ -166,8 +244,6 @@ OPS_DIAGNOSIS_SCHEMA = {
 # ----------------------------------------------------------------------------
 # Project Recovery Agent
 # ----------------------------------------------------------------------------
-# Same shape as ops, with field names that map to project work and risk-spine
-# framing in the layers.
 PROJECT_DIAGNOSIS_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -175,12 +251,16 @@ PROJECT_DIAGNOSIS_SCHEMA = {
         "scratchpad_reasoning",
         "classification",
         "layer_1_visible_risks",
+        "layer_1_threshold_gate",
         "layer_2_risk_drivers",
+        "layer_2_threshold_gate",
         "layer_3_structural",
+        "layer_3_bias_check",
         "recommended_actions",
         "action_plan",
         "kpis",
         "assumptions_to_test",
+        "verification",
         "executive_summary",
     ],
     "properties": {
@@ -209,6 +289,15 @@ PROJECT_DIAGNOSIS_SCHEMA = {
             ),
             "items": {"type": "string"},
         },
+        "layer_1_threshold_gate": {
+            "type": "string",
+            "description": (
+                "The gate question answered before descending to Layer 2. "
+                "Confirm: are there multiple delivery risks present, and do "
+                "they share a common characteristic that suggests a pattern "
+                "rather than isolated incidents? State what that pattern is."
+            ),
+        },
         "layer_2_risk_drivers": {
             "type": "array",
             "description": (
@@ -231,6 +320,15 @@ PROJECT_DIAGNOSIS_SCHEMA = {
                 },
             },
         },
+        "layer_2_threshold_gate": {
+            "type": "string",
+            "description": (
+                "The gate question answered before descending to Layer 3. "
+                "Confirm: do the identified drivers explain the full pattern "
+                "of risk or only part of it? If only part, name what remains "
+                "unexplained and what structural condition might account for it."
+            ),
+        },
         "layer_3_structural": {
             "type": "array",
             "description": (
@@ -241,6 +339,15 @@ PROJECT_DIAGNOSIS_SCHEMA = {
                 "Scrum roles, ineffective ceremonies, poor estimation culture."
             ),
             "items": {"type": "string"},
+        },
+        "layer_3_bias_check": {
+            "type": "string",
+            "description": (
+                "The structural condition the analyst would least want to find "
+                "on this project. State it explicitly and describe what evidence "
+                "was checked for or against it before committing to the Layer 3 "
+                "findings above. This is the bias check."
+            ),
         },
         "recommended_actions": {
             "type": "array",
@@ -317,6 +424,7 @@ PROJECT_DIAGNOSIS_SCHEMA = {
             ),
             "items": {"type": "string"},
         },
+        "verification": VERIFICATION_SCHEMA,
         "executive_summary": {
             "type": "string",
             "description": (
