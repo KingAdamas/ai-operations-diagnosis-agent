@@ -2,12 +2,18 @@
 AI Operations Diagnosis Agent + Project Recovery Agent.
 
 Single Streamlit app, two diagnostic modes, one Layered Thinking framework.
+
+Updated to reflect the improved Layered Thinking Framework:
+- Threshold gate callouts rendered between layer sections
+- Bias check callout rendered inside the Layer 3 section
+- Verification block rendered as its own section after the diagnosis
 """
 
 import json
 import streamlit as st
 from agents import classify_issue, run_ops_diagnosis, run_project_diagnosis
 from playback import render_playback, reset_playback
+from pdf_export import generate_pdf
 
 st.set_page_config(
     page_title="The Diagnosis Engine",
@@ -110,7 +116,7 @@ html, body, [class*="css"], * {
 }
 [data-testid="stSelectbox"] svg { color: #64748B !important; }
 
-/* ── Secondary buttons (compact default: view toggle, playback nav) ── */
+/* ── Secondary buttons ── */
 [data-testid="stBaseButton-secondary"] button {
     background: #FFFFFF !important;
     border: 1.5px solid #CBD5E1 !important;
@@ -131,7 +137,7 @@ html, body, [class*="css"], * {
     outline: none !important;
 }
 
-/* ── Mode picker cards (scoped to the three mode buttons by key) ── */
+/* ── Mode picker cards ── */
 .st-key-btn_ops button,
 .st-key-btn_proj button,
 .st-key-btn_infer button {
@@ -154,7 +160,7 @@ html, body, [class*="css"], * {
     border-color: #94A3B8 !important;
 }
 
-/* ── Run Diagnosis button (primary) ── */
+/* ── Run Diagnosis button ── */
 [data-testid="stBaseButton-primary"] button {
     background-color: #E63000 !important;
     color: #FFFFFF !important;
@@ -199,7 +205,7 @@ hr {
     margin: 2rem 0 !important;
 }
 
-/* ── Info box (inference note) ── */
+/* ── Info box ── */
 [data-testid="stAlertContainer"] {
     background: #EFF6FF !important;
     border: 1px solid #BFDBFE !important;
@@ -214,7 +220,7 @@ hr {
 }
 
 /* ─────────────────────────────────────────────
-   APP HEADER (navy masthead)
+   APP HEADER
 ───────────────────────────────────────────── */
 .app-header {
     background: #0F2044;
@@ -353,6 +359,129 @@ hr {
     margin-top: 3px;
     font-style: italic;
 }
+
+/* ── Threshold gate callout ── */
+.diag-threshold-gate {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-left: 3px solid #64748B;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 12px 0 4px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+.diag-threshold-gate-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748B;
+    white-space: nowrap;
+    padding-top: 1px;
+    flex-shrink: 0;
+}
+.diag-threshold-gate-text {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.55;
+    font-style: italic;
+}
+
+/* ── Bias check callout ── */
+.diag-bias-check {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-left: 3px solid #F59E0B;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 12px 0 4px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+.diag-bias-check-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #92400E;
+    white-space: nowrap;
+    padding-top: 1px;
+    flex-shrink: 0;
+}
+.diag-bias-check-text {
+    font-size: 12px;
+    color: #78350F;
+    line-height: 1.55;
+}
+
+/* ── Verification block ── */
+.diag-verification-block {
+    background: #0F2044;
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-top: 28px;
+}
+.diag-verification-eyebrow {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #60A5FA;
+    margin-bottom: 6px;
+}
+.diag-verification-question {
+    font-size: 14px;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+.diag-verification-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.diag-verification-cell {
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 11px 14px;
+}
+.diag-verification-cell-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #60A5FA;
+    margin-bottom: 5px;
+}
+.diag-verification-cell-value {
+    font-size: 12.5px;
+    color: #E2E8F0;
+    line-height: 1.55;
+}
+.diag-counter-signal {
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 11px 14px;
+    margin-top: 10px;
+}
+.diag-counter-signal-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #FCA5A5;
+    margin-bottom: 5px;
+}
+.diag-counter-signal-value {
+    font-size: 12.5px;
+    color: #E2E8F0;
+    line-height: 1.55;
+}
+
 .diag-section-label {
     font-size: 10.5px;
     font-weight: 700;
@@ -471,12 +600,6 @@ hr {
     line-height: 1.7;
     margin-top: 4px;
 }
-.diag-download-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-top: 8px;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -484,6 +607,56 @@ hr {
 # ----------------------------------------------------------------------------
 # Rendering helpers
 # ----------------------------------------------------------------------------
+def render_threshold_gate(text):
+    st.markdown(
+        f'<div class="diag-threshold-gate">'
+        f'<span class="diag-threshold-gate-label">Gate</span>'
+        f'<span class="diag-threshold-gate-text">{text}</span>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_bias_check(text):
+    st.markdown(
+        f'<div class="diag-bias-check">'
+        f'<span class="diag-bias-check-label">Bias check</span>'
+        f'<span class="diag-bias-check-text">{text}</span>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def render_verification(verification):
+    direction = verification["direction"]
+    arrow = "↑" if direction == "increase" else "↓" if direction == "decrease" else "→"
+    st.markdown(
+        f'<div class="diag-verification-block">'
+        f'<div class="diag-verification-eyebrow">Verification</div>'
+        f'<div class="diag-verification-question">'
+        f'If Layer 3 changed, what would Layer 1 show?'
+        f'</div>'
+        f'<div class="diag-verification-grid">'
+        f'<div class="diag-verification-cell">'
+        f'<div class="diag-verification-cell-label">Metric</div>'
+        f'<div class="diag-verification-cell-value">{verification["metric"]}</div>'
+        f'</div>'
+        f'<div class="diag-verification-cell">'
+        f'<div class="diag-verification-cell-label">Direction and threshold</div>'
+        f'<div class="diag-verification-cell-value">'
+        f'{arrow} {direction.capitalize()} &mdash; {verification["threshold"]}'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+        f'<div class="diag-counter-signal">'
+        f'<div class="diag-counter-signal-label">Counter-signal</div>'
+        f'<div class="diag-counter-signal-value">{verification["counter_signal"]}</div>'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def render_linked_items(items, primary_key, detail_key, detail_label):
     for item in items:
         detail = item[detail_key]
@@ -552,14 +725,20 @@ def render_diagnosis(data, mode):
     with col1:
         st.markdown('<div class="diag-col-title">Layered diagnosis</div>', unsafe_allow_html=True)
 
+        # Layer 1
         st.markdown(
-            f'<div class="diag-layer-label {" ".join(["l1-text"])}">'
+            f'<div class="diag-layer-label l1-text">'
             f'<span class="diag-layer-dot l1-dot"></span>{layer_1_label}</div>',
             unsafe_allow_html=True,
         )
         for item in data[layer_1_key]:
             st.markdown(f'<div class="diag-item">{item}</div>', unsafe_allow_html=True)
 
+        # Threshold gate 1 to 2
+        if data.get("layer_1_threshold_gate"):
+            render_threshold_gate(data["layer_1_threshold_gate"])
+
+        # Layer 2
         st.markdown(
             f'<div class="diag-layer-label l2-text">'
             f'<span class="diag-layer-dot l2-dot"></span>{layer_2_label}</div>',
@@ -575,6 +754,11 @@ def render_diagnosis(data, mode):
                 unsafe_allow_html=True,
             )
 
+        # Threshold gate 2 to 3
+        if data.get("layer_2_threshold_gate"):
+            render_threshold_gate(data["layer_2_threshold_gate"])
+
+        # Layer 3
         st.markdown(
             f'<div class="diag-layer-label l3-text">'
             f'<span class="diag-layer-dot l3-dot"></span>Layer 3: Structural conditions</div>',
@@ -582,6 +766,10 @@ def render_diagnosis(data, mode):
         )
         for item in data["layer_3_structural"]:
             st.markdown(f'<div class="diag-item">{item}</div>', unsafe_allow_html=True)
+
+        # Bias check
+        if data.get("layer_3_bias_check"):
+            render_bias_check(data["layer_3_bias_check"])
 
         st.markdown(
             '<div class="diag-section-label">Recommended actions</div>',
@@ -637,13 +825,27 @@ def render_diagnosis(data, mode):
             unsafe_allow_html=True,
         )
 
+    # Verification block — full width below both columns
+    if data.get("verification"):
+        render_verification(data["verification"])
+
     st.divider()
-    st.download_button(
-        "Download diagnosis (JSON)",
-        data=json.dumps(data, indent=2),
-        file_name=f"{mode}_diagnosis.json",
-        mime="application/json",
-    )
+    try:
+        pdf_bytes = generate_pdf(data, mode)
+        st.download_button(
+            "Download report (PDF)",
+            data=pdf_bytes,
+            file_name="diagnosis_report.pdf",
+            mime="application/pdf",
+        )
+    except Exception as e:
+        st.warning(f"PDF export failed: {str(e)}")
+        st.download_button(
+            "Download diagnosis (JSON)",
+            data=json.dumps(data, indent=2),
+            file_name=f"{mode}_diagnosis.json",
+            mime="application/json",
+        )
 
 
 # ----------------------------------------------------------------------------
@@ -690,11 +892,6 @@ MODE_CARDS = [
     ),
 ]
 
-# Persistent highlight for the selected card. Keyed elements carry a stable
-# .st-key-{key} class, so we target the selected button directly instead of
-# walking the DOM. The focus variants are included so the highlight holds
-# through Streamlit's focus styling, and this rule is injected after the
-# global CSS block so it wins on source order.
 _selected_key = {m: k for m, k, _, _ in MODE_CARDS}[st.session_state.mode]
 st.markdown(f"""
 <style>
@@ -775,8 +972,7 @@ run = st.button("Run Diagnosis", key="run_btn", type="primary", use_container_wi
 
 
 # ----------------------------------------------------------------------------
-# Execution — the result is stored in session state so it survives the
-# reruns triggered by playback navigation, the view toggle, and downloads.
+# Execution
 # ----------------------------------------------------------------------------
 if run:
     if not issue.strip():
@@ -842,8 +1038,7 @@ if run:
 
 
 # ----------------------------------------------------------------------------
-# Results — rendered from session state on every run so the diagnosis
-# persists across interactions. Two views: guided playback and full report.
+# Results
 # ----------------------------------------------------------------------------
 if "diagnosis" in st.session_state:
     saved = st.session_state.diagnosis
